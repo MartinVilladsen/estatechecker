@@ -1,10 +1,10 @@
 package com.example.estatechecker.service;
 
 import com.example.estatechecker.mapper.BoligaEstateMapper;
-import com.example.estatechecker.model.dto.BoligaEstateDto;
 import com.example.estatechecker.model.entity.BoligaEstate;
+import com.example.estatechecker.model.wrapper.BoligaApiResults;
 import com.example.estatechecker.repository.BoligaEstateRepository;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.MappingException;
@@ -34,15 +34,12 @@ public class BoligaServiceImpl implements BoligaService {
         this.repository = repository;
     }
 
+    // TODO: Add javadoc for methods
+
     @Override
     public List<BoligaEstate> findByZipCode(int zipCode) {
-        List<BoligaEstate> estates = new ArrayList<>();
-
         try {
-            String url = String.format(
-                    "https://api.boliga.dk/api/v2/sold/search/results?page=1&pageSize=5000&zipCode=%d",
-                    zipCode
-            );
+            String url = "https://api.boliga.dk/api/v2/sold/search/results?page=1&pageSize=5000&zipCode=" + zipCode;
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
@@ -55,35 +52,24 @@ public class BoligaServiceImpl implements BoligaService {
                     HttpResponse.BodyHandlers.ofString()
             );
 
-            JsonNode root = mapper.readTree(response.body());
-            JsonNode results = root.get("results");
+            BoligaApiResults apiResults = mapper.readValue(response.body(), BoligaApiResults.class);
 
-            if (results == null || !results.isArray()) {
-                log.warn("No results for zip {}", zipCode);
-                return estates;
+            if (apiResults.results() == null || apiResults.results().isEmpty()) {
+                log.debug("No results for zip {}", zipCode);
+                return List.of();
             }
 
-            for (JsonNode node : results) {
-                BoligaEstateDto dto = mapper.treeToValue(node, BoligaEstateDto.class);
-                if (dto.zipCode() != zipCode) {
-                    continue;
-                }
-
-                BoligaEstate estate = BoligaEstateMapper.toEntity(dto);
-
-                estates.add(estate);
-            }
-
+            return apiResults.results().stream()
+                    .filter(dto -> dto.zipCode() == zipCode)
+                    .map(BoligaEstateMapper::toEntity)
+                    .toList();
         } catch (MappingException e) {
-            log.error("Dto object is null. Error: {} ", e.getMessage());
+            log.error("Dto object is null. Error: {}", e.getMessage());
             throw new MappingException("BoligaEstateDto is null", e);
-        }
-        catch (Exception e) {
-            // TODO: Make custom exception and throw here. I should also add GlobalExceptionHandler
+        } catch (Exception e) {
             log.error("Error fetching data", e);
+            return List.of();
         }
-
-        return estates;
     }
 
 
@@ -91,7 +77,7 @@ public class BoligaServiceImpl implements BoligaService {
     public List<BoligaEstate> saveByZipCode(int zipCode) {
 
         List<BoligaEstate> fetched = findByZipCode(zipCode);
-        List<BoligaEstate> toSave = new ArrayList<>();
+        List<BoligaEstate> saved = new ArrayList<>();
 
         for (BoligaEstate estate : fetched) {
             UUID id = estate.getId();
@@ -101,14 +87,15 @@ public class BoligaServiceImpl implements BoligaService {
                 continue;
             }
 
-            toSave.add(estate);
+            saved.add(estate);
         }
 
-        if (toSave.isEmpty()) {
+        if (saved.isEmpty()) {
             log.info("No new estates to save for zip {}", zipCode);
             return List.of();
         }
 
-        return repository.saveAll(toSave);
+        return repository.saveAll(saved);
     }
 }
+
