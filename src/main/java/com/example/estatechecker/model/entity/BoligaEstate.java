@@ -21,7 +21,7 @@ import java.util.UUID;
 public class BoligaEstate {
 
     @PrePersist
-    public void ensuireId() {
+    public void ensureId() {
         if (id == null) {
             // TODO: make prom metrics and grafnaa alerts of failing ids
             id = UUID.randomUUID();
