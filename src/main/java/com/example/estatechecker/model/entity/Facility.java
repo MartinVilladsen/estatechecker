@@ -6,8 +6,11 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import java.util.UUID;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @Slf4j
 @Getter
@@ -18,7 +21,7 @@ import java.util.UUID;
 public class Facility {
 
     @PrePersist
-    public void ensuireId() {
+    public void ensureId() {
         if (id == null) {
             id = UUID.randomUUID();
             log.error("Set UUID after failing");
@@ -35,15 +38,24 @@ public class Facility {
     @Column(name = "longitude", nullable = false)
     private double longitude;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name")
     private String name;
 
-    @Column(name = "brand", nullable = false)
+    @Column(name = "brand")
     private String brand;
 
     @Column(name = "opening_hours")
     private String openingHours;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "facility_type", nullable = false)
     private FacilityType facilityType;
+
+    @CreationTimestamp
+    @Column(name = "creation_timestamp", updatable = false)
+    private OffsetDateTime creationTimestamp;
+
+    @UpdateTimestamp
+    @Column(name = "update_timestamp")
+    private OffsetDateTime updateTimestamp;
 }
