@@ -9,5 +9,6 @@ import java.util.List;
 @Validated
 public interface FacilityService {
     List<FacilityDto> findFacilities(double lat, double lon, int radius);
+
     List<Facility> saveFacilities(double lat, double lon, int radius);
 }
