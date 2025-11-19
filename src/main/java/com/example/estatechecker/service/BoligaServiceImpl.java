@@ -26,10 +26,7 @@ public class BoligaServiceImpl implements BoligaService {
     private final ObjectMapper mapper;
     private final BoligaEstateRepository repository;
 
-    public BoligaServiceImpl(
-            ObjectMapper mapper,
-            BoligaEstateRepository repository
-    ) {
+    public BoligaServiceImpl(ObjectMapper mapper, BoligaEstateRepository repository) {
         this.mapper = mapper;
         this.repository = repository;
     }
@@ -41,16 +38,10 @@ public class BoligaServiceImpl implements BoligaService {
         try {
             String url = "https://api.boliga.dk/api/v2/sold/search/results?page=1&pageSize=5000&zipCode=" + zipCode;
 
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .GET()
-                    .header("Accept", "application/json")
-                    .build();
+            HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).GET()
+                    .header("Accept", "application/json").build();
 
-            HttpResponse<String> response = httpClient.send(
-                    request,
-                    HttpResponse.BodyHandlers.ofString()
-            );
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             BoligaApiResults apiResults = mapper.readValue(response.body(), BoligaApiResults.class);
 
@@ -59,10 +50,8 @@ public class BoligaServiceImpl implements BoligaService {
                 return List.of();
             }
 
-            return apiResults.results().stream()
-                    .filter(dto -> dto.zipCode() == zipCode)
-                    .map(BoligaEstateMapper::toEntity)
-                    .toList();
+            return apiResults.results().stream().filter(dto -> dto.zipCode() == zipCode)
+                    .map(BoligaEstateMapper::toEntity).toList();
         } catch (MappingException e) {
             log.error("Dto object is null. Error: {}", e.getMessage());
             throw new MappingException("BoligaEstateDto is null", e);
@@ -71,7 +60,6 @@ public class BoligaServiceImpl implements BoligaService {
             return List.of();
         }
     }
-
 
     @Override
     public List<BoligaEstate> saveByZipCode(int zipCode) {
@@ -98,4 +86,3 @@ public class BoligaServiceImpl implements BoligaService {
         return repository.saveAll(saved);
     }
 }
-

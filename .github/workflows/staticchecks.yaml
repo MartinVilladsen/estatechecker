@@ -1,0 +1,40 @@
+name: Static checks for PR
+
+on: [pull_request]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '25'
+          cache: maven
+
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v5
+        with:
+          maven-version: 3.8.2
+
+      - name: Run format check
+        run: mvn -B -ntp spotless:check
+
+      - name: Compile project
+        run: mvn -B -ntp compile
+
+      - name: Run SpotBugs
+        run: mvn -B -ntp spotbugs:check
+
+      ## TODO: probably move this to Drone or Woodpecker when i feel like it.
+      - name: Run tests
+        run: mvn -B test

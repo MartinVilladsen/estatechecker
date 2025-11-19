@@ -107,6 +107,4 @@ public class BoligaEstate {
     @Column(name = "update_timestamp")
     private OffsetDateTime updateTimestamp;
 
-
-
 }

@@ -24,7 +24,8 @@ public class BoligaEstateMapper {
                 throw new MappingException("Estate code is null");
             }
 
-            // TODO: Make checks for notnullable properties and throw exceptions. ALso add tests for this later
+            // TODO: Make checks for notnullable properties and throw exceptions. ALso add
+            // tests for this later
 
             BoligaEstate estate = new BoligaEstate();
 

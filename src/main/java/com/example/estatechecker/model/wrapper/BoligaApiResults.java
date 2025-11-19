@@ -7,6 +7,5 @@ import java.util.List;
 
 /** Wrapper for BoligaEstate, i am ignoring meta data from results */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record BoligaApiResults(
-        List<BoligaEstateDto> results
-) {}
+public record BoligaApiResults(List<BoligaEstateDto> results) {
+}
