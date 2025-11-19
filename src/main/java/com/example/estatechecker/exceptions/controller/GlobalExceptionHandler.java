@@ -22,6 +22,7 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleGenericException(Exception e) {
         log.error("Unexpected error: {}", e.getMessage(), e);
 
-        return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occured, check logs for details");
+        return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR,
+                "An unexpected error occured, check logs for details");
     }
 }

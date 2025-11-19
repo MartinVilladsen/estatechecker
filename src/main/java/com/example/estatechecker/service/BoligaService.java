@@ -9,5 +9,6 @@ import java.util.Optional;
 @Validated
 public interface BoligaService {
     List<BoligaEstate> findByZipCode(int zipCode);
+
     List<BoligaEstate> saveByZipCode(int zipCode);
 }
